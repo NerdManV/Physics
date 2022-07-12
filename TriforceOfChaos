@@ -1,0 +1,126 @@
+# Author: Lucas Vigil
+# Date: 5/17/19
+# Description: Make a sierpinksi triangle thing using chaos and turtles
+
+import random
+import turtle
+
+
+
+def turtle_setup(canv_width, canv_height):
+    """ Set up the canvas and a turtle for coloring pixels. Return a turtle
+        object in hidden state with its pen up. The canvas has size canv_width
+        by canv_height, with a coordinate system where (0,0) is in the bottom
+        left corner, and automatic re-drawing of the canvas is disabled so that
+        turtle.update() must be called to update the drawing.
+    """
+    # create a turtle to color pixels with
+    t=turtle.Turtle() 
+   
+    # set the screen size, coordinate system, and color mode:
+    screen = t.getscreen()
+    screen.setup(canv_width, canv_height)
+    screen.setworldcoordinates(0, 0, canv_width, canv_height)
+    turtle.colormode(255) # specify how colors are set: we'll use 0-255
+    
+    t.up() # lift the pen
+    t.hideturtle() # hide the turtle triangle
+    screen.tracer(0, 0) # turn off redrawing after each movement
+    
+    return t
+
+def distance(x1, y1, x2, y2):
+    """ Returns the distance between 2 points x1, y1 and x2, y2
+        Pre Condition: x1, x2, y1, y2 are integers in the window
+    """
+    result = ((x1-x2)**2 + (y1-y2)**2)**0.5
+    if result > 255:
+        result = 255
+    return result
+
+def mid(p1, p2):
+    """ Gives the value between two integers p1 and p2.
+        Precondition: p1 and p2 are the x or y values of two points on the canvas and are both integers where
+        p2 > p1
+        Postcondition: Returns the integer x or y value of a midpoint, does not give both and and y value
+    """
+    return ((p2-p1)/2)
+
+def randx(canv_width):
+    """Picks a random point on the canvas as a starting point for the chaos game
+       Precondtion: canv_width is an integer
+    """
+    px= random.randrange(canv_width)
+    return px
+
+def randy(canv_height):
+    """Picks a random point on the canvas as a starting point for the chaos game
+       Precondtion: canv_height is an integer
+    """
+    py= random.randrange(canv_height)
+    return py
+
+def chaos(canv_width, canv_height, px, py):
+    """Picks a random point in the canvas and finds the midpoint
+        between it and a random corner of the triangle
+        Precondition: All parameters are integers
+    """
+    cn = random.randrange(3)
+    if cn==0:
+        cy = canv_height
+        cx = canv_width/2
+    if cn== 1:
+        cy= 0
+        cx= 0
+    if cn== 2:
+        cy= 0
+        cx= canv_width
+    px= cx+mid(cx, px)
+    py= cy+mid(cy, py)
+    return (px, py)
+    
+    
+def choose_color(canv_width, canv_height, px, py):
+    """ Chooses the color of the current point p, established in chaos after rand_point.
+        r gives the redness of the point with its distance from the top corner
+        b gives the blueness with its distance from the lower right corner
+        g gives the greenness with its distance from the lower left corner
+        PreCondition: px and py are integers
+        PostCondition: r, b, g are integers from 0-255
+    """
+    r= int((255-distance(px, py, canv_width/2, canv_height)))
+    b= int((255-distance(px, py, canv_width, 0)))
+    g= int((255-distance(px, py, 0, 0)))
+    return (r, g, b)
+        
+def drawing(t, canv_width, canv_height, px, py):
+    """Uses chaos and choose color functions to draw each point on the triangle
+        Precondtion: t is a turtle. The other parameters are integers.
+    """
+    t.penup()
+    (px, py)= chaos(canv_width, canv_height, px, py)
+    t.goto(px, py)
+    color= choose_color(canv_width, canv_height, px, py)
+    t.pendown()
+    t.dot(2, color)
+    t.penup()
+    return (t, px, py)
+
+def main(canv_width, canv_height):
+    """ Combines the drawing, chaos, turtle setup, choose color, mid, and distance functions all
+        into one and loops them to draw the sierpinksi triangle.
+        Precondition: canv_width and canv_height are integers
+    """
+    t=turtle_setup(canv_width, canv_height)
+    px= randx(canv_width)
+    py= randy(canv_height)
+    for i in range(10000):
+        if i>10:
+            t, px, py= drawing(t, canv_width, canv_height, px, py)
+        else:
+            px, py= chaos(canv_width, canv_height, px, py)
+            
+    turtle.update()
+    
+
+main(300, 120)
